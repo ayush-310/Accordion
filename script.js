@@ -27,54 +27,42 @@ const items = [
 
 const accordion = document.getElementById("accordion");
 
-// Build all items once
-const fragment = document.createDocumentFragment();
+accordion.innerHTML = items.map(({ question, answer }) => `
+    <div class="accordion-item">
+        <button class="accordion-header" aria-expanded="false">
+            <span>${question}</span>
+            <span class="arrow">▼</span>
+        </button>
+        <div class="accordion-content">${answer}</div>
+    </div>
+`).join('');
 
-items.forEach(({ question, answer }) => {
-    const item = document.createElement("div");
-    item.className = "accordion-item";
-
-    const header = document.createElement("div");
-    header.className = "accordion-header";
-
-    const q = document.createElement("p");
-    q.textContent = question;
-
-    const arrow = document.createElement("span");
-    arrow.className = "arrow";
-    arrow.textContent = "▼";
-
-    const content = document.createElement("div");
-    content.className = "accordion-content";
-    content.textContent = answer;
-
-    header.appendChild(q);
-    header.appendChild(arrow);
-    item.appendChild(header);
-    item.appendChild(content);
-    fragment.appendChild(item);
-});
-
-accordion.appendChild(fragment);
-
-// Delegate event
 accordion.addEventListener("click", (e) => {
     const header = e.target.closest(".accordion-header");
     if (!header) return;
 
-    const content = header.nextElementSibling;
+    /* `const item = header.parentElement;` is retrieving the parent element of the clicked header
+    button. In this case, the header button is the button element with the class "accordion-header",
+    and its parent element is the div with the class "accordion-item" that contains both the header
+    button and the content of the accordion item. This line of code allows you to access the entire
+    accordion item when a header button is clicked, so you can manipulate its content or style based
+    on user interaction. */
+    const item = header.parentElement;
+    const content = item.querySelector(".accordion-content");
     const arrow = header.querySelector(".arrow");
-
     const isOpen = content.classList.contains("open");
 
     // Close all
     accordion.querySelectorAll(".accordion-content").forEach(c => {
         c.classList.remove("open");
+        c.previousElementSibling.setAttribute("aria-expanded", "false");
         c.previousElementSibling.querySelector(".arrow").classList.remove("rotate");
     });
 
+    // Open clicked
     if (!isOpen) {
         content.classList.add("open");
+        header.setAttribute("aria-expanded", "true");
         arrow.classList.add("rotate");
     }
 });
